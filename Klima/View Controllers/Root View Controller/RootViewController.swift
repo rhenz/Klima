@@ -99,10 +99,7 @@ final class RootViewController: UIViewController {
                 
             case .failure(let error):
                 print("Error: \(error.localizedDescription)")
-                
-                DispatchQueue.main.async {
-                    self?.presentAlert(for: .noWeatherDataAvailable)
-                }
+                self?.presentAlert(for: .noWeatherDataAvailable)
             }
         }
     }

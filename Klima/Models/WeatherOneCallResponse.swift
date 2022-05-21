@@ -82,6 +82,24 @@ struct WeatherOneCallResponse: Codable {
     }
 }
 
+extension WeatherOneCallResponse: WeatherData {
+    var current: CurrentWeatherConditions {
+        return currently
+    }
+    
+    var latitude: Double {
+        return lat
+    }
+    
+    var longitude: Double {
+        return lon
+    }
+    
+    var forecast: [ForecastWeatherConditions] {
+        return daily
+    }
+}
+
 extension WeatherOneCallResponse.Conditions: CurrentWeatherConditions {
     var summary: String {
         return (weather.first?.description ?? "").capitalized
@@ -114,24 +132,6 @@ extension WeatherOneCallResponse.Daily.Conditions: ForecastWeatherConditions {
     }
     
     var icon: String {
-        return weather.first?.description ?? ""
-    }
-}
-
-extension WeatherOneCallResponse: WeatherData {
-    var current: CurrentWeatherConditions {
-        return currently
-    }
-    
-    var latitude: Double {
-        return lat
-    }
-    
-    var longitude: Double {
-        return lon
-    }
-    
-    var forecast: [ForecastWeatherConditions] {
-        return daily
+        return weather.first?.icon ?? ""
     }
 }

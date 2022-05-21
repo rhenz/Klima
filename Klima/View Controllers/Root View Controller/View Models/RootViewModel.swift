@@ -19,37 +19,19 @@ class RootViewModel {
     
     // MARK: -
     func fetchWeatherData() {
-        // Create URL
-        let weatherRequest = Endpoint.weatherRequestOneCall(location: Defaults.location)
+        let request = OnecallWeatherAPI(location: Defaults.location)
         
-        guard let url = weatherRequest.url else {
-            fatalError("Invalid URL")
-        }
-        
-        URLSession.shared.dataTask(with: url) { [weak self] (data, response, error) in
-            if let response = response as? HTTPURLResponse {
-                print("Status Code: \(response.statusCode)")
-            }
-            
+        APILoader(apiHandler: request).loadAPIRequest { [weak self] response, error in
             DispatchQueue.main.async {
                 if let error = error {
                     print("Unable to Fetch Weather Data: \(error)")
                     self?.didFetchWeatherData?(.failure(.noWeatherDataAvailable))
-                } else if let data = data {
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .secondsSince1970
-                        let jsonData = try decoder.decode(WeatherOneCallResponse.self, from: data)
-                        self?.didFetchWeatherData?(.success(jsonData))
-                    } catch {
-                        print("Unable to Decode JSON Response - Error: \(error)")
-                        self?.didFetchWeatherData?(.failure(.noWeatherDataAvailable))
-                    }
-                    
+                } else if let response = response {
+                    self?.didFetchWeatherData?(.success(response))
                 } else {
                     self?.didFetchWeatherData?(.failure(.noWeatherDataAvailable))
                 }
             }
-        }.resume()
+        }
     }
 }

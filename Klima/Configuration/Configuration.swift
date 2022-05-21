@@ -11,7 +11,7 @@ import CoreLocation
 enum Defaults {
     
     // Manila
-    static let location = CLLocation(latitude: 14.5995, longitude: 120.9842)
+    static let location = CLLocation(latitude: 14.6052261, longitude: 121.0892593)
 }
 
 enum WeatherService {
@@ -30,4 +30,10 @@ enum WeatherIconSystemImage {
     static let thunderstorm = "cloud.bolt"
     static let snow = "cloud.snow"
     static let fog = "cloud.fog"
+}
+
+// API Headers
+enum APIHeaders {
+    static var kContentType = "Content-Type"
+    static var contentTypeValue = "application/json"
 }

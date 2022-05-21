@@ -13,6 +13,7 @@ enum WeatherIconError: Error {
     case unknownIcon
 }
 
+// https://openweathermap.org/weather-conditions#How-to-get-icon-URL
 struct WeatherIcon {
     private init() { }
     
