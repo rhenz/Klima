@@ -13,10 +13,9 @@ struct ServiceError: Error, Codable {
 }
 
 extension ResponseHandler {
-    func parse<T: Codable>(data: Data, response: HTTPURLResponse) throws -> T {
-        let jsonDecoder = JSONDecoder()
+    func parse<T: Codable>(data: Data, response: HTTPURLResponse, decoder: JSONDecoder = JSONDecoder()) throws -> T {
         do {
-            let body = try jsonDecoder.decode(T.self, from: data)
+            let body = try decoder.decode(T.self, from: data)
             if response.statusCode == 200 {
                 return body
             } else {

@@ -18,6 +18,7 @@ enum APIPath {
     
     static private let baseURL = environment.url
     
+    // API Paths
     static var onecall: URL? {
         return baseURL?.appendingPathComponent("data/2.5/onecall")
     }

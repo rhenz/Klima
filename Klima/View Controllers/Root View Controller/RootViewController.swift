@@ -10,6 +10,7 @@ import UIKit
 final class RootViewController: UIViewController {
     
     private enum AlertType {
+        case notAuthorizedToRequestLocation
         case noWeatherDataAvailable
     }
     
@@ -99,7 +100,7 @@ final class RootViewController: UIViewController {
                 
             case .failure(let error):
                 print("Error: \(error.localizedDescription)")
-                self?.presentAlert(for: .noWeatherDataAvailable)
+                self?.presentAlert(for: error)
             }
         }
     }

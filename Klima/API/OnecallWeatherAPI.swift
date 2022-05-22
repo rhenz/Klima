@@ -43,6 +43,8 @@ struct OnecallWeatherAPI: APIHandler {
     }
     
     func parseResponse(data: Data, response: HTTPURLResponse) throws -> WeatherOneCallResponse {
-        return try parse(data: data, response: response)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        return try parse(data: data, response: response, decoder: decoder)
     }
 }
