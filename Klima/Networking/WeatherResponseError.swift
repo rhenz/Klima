@@ -10,6 +10,7 @@ import Foundation
 enum WeatherResponseError: Error {
     case noWeatherDataAvailable
     case notAuthorizedToRequestLocation
+    case failedToRequestLocation
     
     func alertTitleAndMessage() -> (title: String, message: String) {
         switch self {
@@ -21,6 +22,11 @@ enum WeatherResponseError: Error {
         case .notAuthorizedToRequestLocation:
             let title = "Unable to Fetch Weather Data for Your Location"
             let message = "Rainstorm is not authorized to access your current location. This means it's unable to show you the weather for your current location. You can grant Rainstorm access to your current location in the Settings application."
+            return (title, message)
+            
+        case .failedToRequestLocation:
+            let title = "Unable to Fetch Weather Data for Your Location"
+            let message = "Rainstorm is not able to fetch your current location due to a technical issue."
             return (title, message)
         }
     }

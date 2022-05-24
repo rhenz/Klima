@@ -12,6 +12,7 @@ final class RootViewController: UIViewController {
     private enum AlertType {
         case notAuthorizedToRequestLocation
         case noWeatherDataAvailable
+        case failedToRequestLocation
     }
     
     // MARK: - Properties

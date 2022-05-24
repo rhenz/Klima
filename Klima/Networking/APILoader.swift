@@ -17,6 +17,7 @@ struct APILoader<T: APIHandler> {
     }
     
     typealias APIRequestHandler = (T.ResponseDataType?, ServiceError?) -> Void
+    
     func loadAPIRequest(completionHandler: @escaping APIRequestHandler) {
         if let urlRequest = apiHandler.makeRequest() {
             urlSession.dataTask(with: urlRequest) { (data, response, error) in

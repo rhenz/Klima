@@ -22,7 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             fatalError("Invalid Root View Controller")
         }
         
-        let rootViewModel = RootViewModel()
+        let rootViewModel = RootViewModel(locationService: LocationManager())
         rootViewController.viewModel = rootViewModel
     }
 

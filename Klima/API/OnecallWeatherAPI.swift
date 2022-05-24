@@ -6,19 +6,19 @@
 //
 
 import Foundation
-import CoreLocation
+//import CoreLocation
 
 struct OnecallWeatherAPI: APIHandler {
    
     // MARK: - Properties
-    var location: CLLocation
+    var location: Location
     
     private var latitude: Double {
-        location.coordinate.latitude
+        location.latitude
     }
     
     private var longitude: Double {
-        location.coordinate.longitude
+        location.longitude
     }
     
     private var queryParams: [String : Any] {

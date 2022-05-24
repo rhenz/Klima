@@ -6,37 +6,55 @@
 //
 
 import Foundation
-import CoreLocation
+import UIKit
 
 class RootViewModel: NSObject {
-    typealias DidFetchWeatherDataCompletion = (Result<WeatherData, WeatherResponseError>) -> Void
+    typealias FetchWeatherDataCompletion = (Result<WeatherData, WeatherResponseError>) -> Void
     
     // MARK: - Properties
-    var didFetchWeatherData: DidFetchWeatherDataCompletion?
+    var didFetchWeatherData: FetchWeatherDataCompletion?
+    private let locationService: LocationService
     
-    private lazy var locationManager: CLLocationManager = {
-        // Initialize Location Manager
-        let locationManager = CLLocationManager()
-        
-        // Configure Location Manager Delegate
-        locationManager.delegate = self
-        return locationManager
-    }()
+    
     
     // MARK: - Init
-    override init() {
+    init(locationService: LocationService) {
+        // Set Location Service
+        self.locationService = locationService
+        
         super.init()
         
         // Fetch Weather Data
         fetchWeatherData(for: Defaults.location)
         
+        // Setup Notification Handling
+        setupNotificationHandling()
+        
         // Fetch Location
         fetchLocation()
     }
     
+    // MARK: -
+    private func setupNotificationHandling() {
+        // Application Will Enter Foreground
+        NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { [weak self] _ in
+            guard let didFetchWeatherData = UserDefaults.didFetchWeatherData else {
+                self?.refresh()
+                return
+            }
+
+            if Date().timeIntervalSince(didFetchWeatherData) > 10.0 * 60.0 {
+                self?.refresh()
+            }
+        }
+    }
+    
+    private func refresh() {
+        fetchLocation()
+    }
     
     // MARK: -
-    private func fetchWeatherData(for location: CLLocation) {
+    private func fetchWeatherData(for location: Location) {
         let request = OnecallWeatherAPI(location: location)
         
         APILoader(apiHandler: request).loadAPIRequest { [weak self] response, error in
@@ -45,6 +63,10 @@ class RootViewModel: NSObject {
                     print("Unable to Fetch Weather Data: \(error)")
                     self?.didFetchWeatherData?(.failure(.noWeatherDataAvailable))
                 } else if let response = response {
+                    // Update User Defaults
+                    UserDefaults.didFetchWeatherData = Date()
+                    
+                    // Invoke Completion Handler
                     self?.didFetchWeatherData?(.success(response))
                 } else {
                     self?.didFetchWeatherData?(.failure(.noWeatherDataAvailable))
@@ -55,34 +77,41 @@ class RootViewModel: NSObject {
     
     private func fetchLocation() {
         // Request Location
-        locationManager.requestLocation()
+        locationService.fetchLocation { [weak self] result in
+            switch result {
+            case .success(let location):
+                guard let location = location else {
+                    fatalError("Location was not given")
+                }
+                self?.fetchWeatherData(for: location)
+            case .failure(let error):
+                print("Error: \(error)")
+                switch error {
+                case .notAuthorizedToRequestLocation:
+                    self?.didFetchWeatherData?(.failure(.notAuthorizedToRequestLocation))
+                case .someError:
+                    self?.didFetchWeatherData?(.failure(.failedToRequestLocation))
+                }
+            }
+        }
     }
 }
 
-// MARK: - CLLocationManagerDelegate
-extension RootViewModel: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Unable to Fetch Location: \(error)")
+
+
+extension UserDefaults {
+    // MARK: - Types
+    private enum Keys {
+        static let didFetchWeatherData = "didFetchWeatherData"
     }
     
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        
-        if manager.authorizationStatus == .notDetermined {
-            // Request for Authorization
-            locationManager.requestWhenInUseAuthorization()
-        } else if manager.authorizationStatus == .authorizedWhenInUse {
-            // Fetch Location
-            fetchLocation()
-        } else {
-            // Invoke completion handler
-            didFetchWeatherData?(.failure(.notAuthorizedToRequestLocation))
+    // MARK: - Class Computed Properties
+    fileprivate class var didFetchWeatherData: Date? {
+        get {
+            return UserDefaults.standard.object(forKey: Keys.didFetchWeatherData) as? Date
         }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.first else { return }
-        
-        // Fetch Weather Data
-        fetchWeatherData(for: location)
+        set(newValue) {
+            UserDefaults.standard.set(newValue, forKey: Keys.didFetchWeatherData)
+        }
     }
 }
