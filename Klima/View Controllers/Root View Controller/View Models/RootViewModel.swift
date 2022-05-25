@@ -49,7 +49,7 @@ class RootViewModel: NSObject {
         }
     }
     
-    private func refresh() {
+    func refresh() {
         fetchLocation()
     }
     

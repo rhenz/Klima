@@ -38,12 +38,13 @@ final class RootViewController: UIViewController {
         return dayViewController
     }()
     
-    private let weekViewController: WeekViewController = {
+    private lazy var weekViewController: WeekViewController = {
         guard let weekViewController = UIStoryboard.main.instantiateViewController(identifier: WeekViewController.storyboardIdentifier) as? WeekViewController else {
             fatalError("Unable to Instantiate Day View Controller")
         }
         
         // Configure Day View Controller
+        weekViewController.delegate = self
         weekViewController.view.translatesAutoresizingMaskIntoConstraints = false
         
         return weekViewController
@@ -102,6 +103,10 @@ final class RootViewController: UIViewController {
             case .failure(let error):
                 print("Error: \(error.localizedDescription)")
                 self?.presentAlert(for: error)
+                
+                // Update Child View Controllers by setting viewModels to nil
+                self?.dayViewController.viewModel = nil
+                self?.weekViewController.viewModel = nil
             }
         }
     }
@@ -115,7 +120,9 @@ final class RootViewController: UIViewController {
     }
 }
 
-
-extension RootViewController {
-    
+// MARK: - WeekViewControllerDelegate
+extension RootViewController: WeekViewControllerDelegate {
+    func controllerDidRefresh(_ controller: WeekViewController) {
+        viewModel?.refresh()
+    }
 }

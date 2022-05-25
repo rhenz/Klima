@@ -15,18 +15,36 @@ protocol WeekDayRepresentable {
     var image: UIImage? { get }
 }
 
+protocol WeekViewControllerDelegate: AnyObject {
+    func controllerDidRefresh(_ controller: WeekViewController)
+}
+
 final class WeekViewController: UIViewController {
     // MARK: - Properties
     var viewModel: WeekViewModel? {
         didSet {
-            guard let viewModel = viewModel else {
-                return
-            }
+            // Hide Refresh Control
+            refreshControl.endRefreshing()
             
-            // Setup View Model
-            setupViewModel(with: viewModel)
+            if let viewModel = viewModel {
+                // Setup View Model
+                setupViewModel(with: viewModel)
+            }
         }
     }
+    
+    private lazy var refreshControl: UIRefreshControl = {
+        // Initialize Refresh Control
+        let refreshControl = UIRefreshControl()
+        
+        // Configure Refresh Control
+        refreshControl.tintColor = Styles.Colors.baseTintColor
+        refreshControl.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        
+        return refreshControl
+    }()
+    
+    weak var delegate: WeekViewControllerDelegate?
     
     // MARK: -
     @IBOutlet var tableView: UITableView! {
@@ -37,6 +55,9 @@ final class WeekViewController: UIViewController {
             tableView.estimatedRowHeight = 44.0
             tableView.rowHeight = UITableView.automaticDimension
             tableView.showsVerticalScrollIndicator = false
+            
+            // Set Refresh Control
+            tableView.refreshControl = refreshControl
         }
     }
     
@@ -90,5 +111,13 @@ extension WeekViewController: UITableViewDataSource {
         cell.configure(with: viewModel.viewModel(for: indexPath.item))
         
         return cell
+    }
+}
+
+// MARK: - Actions
+extension WeekViewController {
+    @objc private func refresh(_ sender: UIRefreshControl) {
+        // Notify Delegate
+        delegate?.controllerDidRefresh(self)
     }
 }
