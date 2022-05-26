@@ -15,7 +15,8 @@ enum LocationServiceError: Error {
 protocol LocationService {
     
     // MARK: - Type Aliases
-    typealias FetchLocationCompletion = (Result<Location?, LocationServiceError>) -> Void
+    typealias LocationServiceResult = Result<Location?, LocationServiceError>
+    typealias FetchLocationCompletion = (LocationServiceResult) -> Void
     
     // MARK: - Methods
     func fetchLocation(completion: @escaping FetchLocationCompletion)

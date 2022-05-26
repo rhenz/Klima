@@ -56,6 +56,9 @@ final class RootViewController: UIViewController {
         
         // Setup Child View Controllers
         setupChildViewControllers()
+        
+        // Refresh Weather Data
+        viewModel?.refresh()
     }
     
     // MARK: - Helper Methods
